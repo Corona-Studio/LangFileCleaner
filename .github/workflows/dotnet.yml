@@ -11,7 +11,6 @@ jobs:
 
   release:
     name: Create GitHub Release
-    if: needs.prepare.outputs.should_build == 'true'
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.tag.outputs.tag }}
