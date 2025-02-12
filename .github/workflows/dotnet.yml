@@ -56,7 +56,15 @@ jobs:
       run: dotnet publish -c Release --no-restore
       working-directory: ./LangFileCleaner
 
-    - name: Compress Build Files
+    - name: Compress Build Files (Windows)
+      if: matrix.os == "windows-latest"
+      run: Compress-Archive -Path publish -DestinationPath ${{ env.OS }}.zip
+      working-directory: ./LangFileCleaner/bin/Release/net9.0
+      env:
+        OS: ${{ matrix.os }}
+
+    - name: Compress Build Files (Unix)
+      if: (matrix.os == "macos-latest") || (matrix.os == "ubuntu-latest")
       run: zip -9 -r ${{ env.OS }}.zip publish
       working-directory: ./LangFileCleaner/bin/Release/net9.0
       env:
