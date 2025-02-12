@@ -10,6 +10,10 @@
     "RepairLangFile": {
       "commandName": "Project",
       "commandLineArgs": "repair -r \"E:\\GitHub\\LauncherX.Avalonia\\LauncherX.Avalonia\" -f \"Assets\\Language\\zh_cn.axaml\" -o \"./out.axaml\" -v"
+    },
+    "SyncLangFile": {
+      "commandName": "Project",
+      "commandLineArgs": "sync -s \"E:\\GitHub\\LauncherX.Avalonia\\LauncherX.Avalonia\\Assets\\Language\\zh_cn.axaml\" -t \"E:\\GitHub\\LauncherX.Avalonia\\LauncherX.Avalonia\\Assets\\Language\\ru_ru.axaml\" -o \"./sync.axaml\" -v"
     }
   }
 }

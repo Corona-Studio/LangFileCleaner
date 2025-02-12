@@ -65,30 +65,6 @@ public static class UnusedKeyCommand
         }
     }
 
-    private static FrozenSet<string> ResolveLangKeys(string langPath)
-    {
-        var result = new HashSet<string>();
-        var dictionary = new XmlDocument();
-
-        dictionary.Load(langPath);
-
-        var nameSpace = new XmlNamespaceManager(dictionary.NameTable);
-        nameSpace.AddNamespace("sys", "clr-namespace:System;assembly=System.Runtime");
-
-        var dictionaryNodes = dictionary.SelectNodes("//sys:String", nameSpace);
-
-        ArgumentNullException.ThrowIfNull(dictionaryNodes);
-
-        foreach (XmlNode node in dictionaryNodes)
-        {
-            var key = node.Attributes!["x:Key"]!.Value;
-
-            result.Add(key);
-        }
-
-        return result.ToFrozenSet();
-    }
-
     private static FrozenSet<(string Raw, string Pattern)> GetNormalizedMatchPatterns(FrozenSet<string> langKeys)
     {
         return langKeys
@@ -97,11 +73,11 @@ public static class UnusedKeyCommand
             .ToFrozenSet();
     }
 
-    private static async IAsyncEnumerable<string> SearchForPatternsAsync(FrozenSet<(string Raw, string Pattern)> patterns, string[] files, Logger? logger)
+    private static async IAsyncEnumerable<string> SearchForPatternsAsync(FrozenSet<(string Raw, string Pattern)> patterns, string[] files, Logger logger)
     {
         foreach (var file in files)
         {
-            logger?.Debug("Searching in {File}", file);
+            logger.Debug("Searching in {File}", file);
 
             var content = await File.ReadAllLinesAsync(file);
             var matches = content
@@ -116,7 +92,7 @@ public static class UnusedKeyCommand
         }
     }
 
-    public static async Task<FrozenSet<string>> ResolveAndCheckAsync(string root, string srcFilePath, Logger? logger)
+    public static async Task<FrozenSet<string>> ResolveAndCheckAsync(string root, string srcFilePath, Logger logger)
     {
         root = $"{Path.GetFullPath(root)}{Path.DirectorySeparatorChar}";
 
@@ -125,15 +101,15 @@ public static class UnusedKeyCommand
 
         ArgumentOutOfRangeException.ThrowIfEqual(File.Exists(langFilePath), false);
 
-        logger?.Debug("Resolving lang keys from {LangFilePath}", langFilePath);
+        logger.Debug("Resolving lang keys from {LangFilePath}", langFilePath);
 
-        var langKeys = ResolveLangKeys(langFilePath);
+        var langKeys = LangFileHelper.ParseXamlFile(langFilePath).Keys.ToFrozenSet();
 
         ArgumentOutOfRangeException.ThrowIfEqual(langKeys.Count, 0);
 
         var normalizedMatchPatterns = GetNormalizedMatchPatterns(langKeys);
 
-        logger?.Debug("Searching for files in {Root}", root);
+        logger.Debug("Searching for files in {Root}", root);
 
         // BFS
         var usedKeys = new HashSet<string>();
@@ -148,7 +124,7 @@ public static class UnusedKeyCommand
             if (!Directory.Exists(dir))
                 continue;
 
-            logger?.Debug("Searching in {Dir}", dir);
+            logger.Debug("Searching in {Dir}", dir);
 
             var files = Directory.EnumerateFiles(dir)
                 .Where(f => MatchExts.Contains(Path.GetExtension(f)))

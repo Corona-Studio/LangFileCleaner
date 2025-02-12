@@ -14,7 +14,7 @@ public static class RepairUnusedKeyCommand
         {
             CommandConstants.UnusedKeys.RootPathOption,
             CommandConstants.UnusedKeys.LangFilePathOption,
-            CommandConstants.UnusedKeys.Repair.OutFilePathOption,
+            CommandConstants.OutFilePathOption,
             CommandConstants.VerboseOption
         };
 
@@ -27,7 +27,7 @@ public static class RepairUnusedKeyCommand
     {
         var root = (string?)context.ParseResult.GetValueForOption(CommandConstants.UnusedKeys.RootPathOption);
         var srcFilePath = (string?)context.ParseResult.GetValueForOption(CommandConstants.UnusedKeys.LangFilePathOption);
-        var outFilePath = (string?)context.ParseResult.GetValueForOption(CommandConstants.UnusedKeys.Repair.OutFilePathOption);
+        var outFilePath = (string?)context.ParseResult.GetValueForOption(CommandConstants.OutFilePathOption);
         var verbose = (bool?)context.ParseResult.GetValueForOption(CommandConstants.VerboseOption) ?? false;
 
         ArgumentException.ThrowIfNullOrEmpty(root);
@@ -41,7 +41,7 @@ public static class RepairUnusedKeyCommand
         await RepairLangFileAsync(root, srcFilePath, outFilePath, logger);
     }
 
-    private static async Task RepairLangFileAsync(string root, string srcFilePath, string outFilePath, Logger? logger)
+    private static async Task RepairLangFileAsync(string root, string srcFilePath, string outFilePath, Logger logger)
     {
         root = $"{Path.GetFullPath(root)}{Path.DirectorySeparatorChar}";
         outFilePath = Path.GetFullPath(outFilePath);
@@ -104,7 +104,9 @@ public static class RepairUnusedKeyCommand
             // this resource is no longer used, so we add a comment to it
             var isOneLiner = trimmedLine.EndsWith("</sys:String>", StringComparison.Ordinal);
 
-            logger?.Debug("Found unused {Oneliner} key: {Line}", line, isOneLiner ? "one-liner" : string.Empty);
+            logger.Debug("Found unused {Oneliner} key: {Line}",
+                isOneLiner ? "one-liner" : string.Empty,
+                trimmedLine);
 
             if (isOneLiner)
             {
@@ -117,7 +119,7 @@ public static class RepairUnusedKeyCommand
             isInMultipleLineResourceRange = true;
         }
 
-        logger?.Information("Writing repaired lang file to {OutFilePath}", outFilePath);
+        logger.Information("Writing repaired lang file to {OutFilePath}", outFilePath);
         await File.WriteAllLinesAsync(outFilePath, langFileContents);
     }
 }
