@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "LangFileCleaner": {
+      "commandName": "Project"
+    },
+    "UnusedCheck": {
+      "commandName": "Project",
+      "commandLineArgs": "unused -r \"E:\\GitHub\\LauncherX.Avalonia\\LauncherX.Avalonia\" -f \"Assets\\Language\\zh_cn.axaml\" -fu -v"
+    }
+  }
+}
