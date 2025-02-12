@@ -8,7 +8,39 @@ on:
     branches: [ "master" ]
 
 jobs:
+
+  release:
+    name: Create GitHub Release
+    if: needs.prepare.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+      if: github.event_name != 'push'
+
+    - name: Set tag name
+      id: tag
+      run: |
+        if [[ "${{ github.event_name }}" != "push" ]]; then
+          tag=v$(date +%Y%m%d.%H%M%S)
+        else
+          tag=$(basename "${{ github.ref }}")
+        fi
+        echo "tag=$tag" >> $GITHUB_OUTPUT
+    - name: Create Release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_REPO: ${{ github.repository }}
+      run: |
+        tag="${{ steps.tag.outputs.tag }}"
+        body="Corona-Studio/LangFileCleaner@${{ needs.prepare.outputs.commit }}"
+        gh release create --draft "$tag" --title "$tag" --notes "$body"
+
   build:
+    needs: [release]
     strategy:
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
@@ -35,30 +67,27 @@ jobs:
       env:
         OS: ${{ matrix.os }}
 
-    - name: Create Draft Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.LANGFILECLEANERTOKEN }}
-        OS: ${{ matrix.os }}
-      with:
-        tag_name: Publish-${{ github.sha }}-${{ env.OS }}
-        release_name: ${{ github.ref_name }}.${{ github.sha }}
-        draft: true
-        prerelease: false
-
-    - uses: actions/upload-release-asset@v1.0.1
+    - name: Upload Built Binaries
       env:
         OS: ${{ matrix.os }}
-        GITHUB_TOKEN: ${{ secrets.LANGFILECLEANERTOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./LangFileCleaner/bin/Release/net9.0/${{ env.OS }}.zip
-        asset_name: ${{ env.OS }}.zip
-        asset_content_type: application/zip
+        GH_TOKEN: ${{ secrets.LANGFILECLEANERTOKEN }}
+        GH_REPO: ${{ github.repository }}
+      run: gh release upload "${{ needs.release.outputs.tag }}" "${{ env.OS }}.zip"
+      working-directory: ./LangFileCleaner/bin/Release/net9.0
 
-    - uses: eregon/publish-release@v1
+  publish:
+    name: Publish Release
+    needs: [release, build]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Publish Release
+      env:
+        GH_TOKEN: ${{ secrets.LANGFILECLEANERTOKEN }}
+        GH_REPO: ${{ github.repository }}
+      run: gh release edit "${{ needs.release.outputs.tag }}" --draft=false
+    - uses: eregon/keep-last-n-releases@v1
       env:
         GITHUB_TOKEN: ${{ secrets.LANGFILECLEANERTOKEN }}
       with:
-        release_id: ${{ steps.create_release.outputs.id }}
+        n: 3
+        remove_tags_without_release: true
