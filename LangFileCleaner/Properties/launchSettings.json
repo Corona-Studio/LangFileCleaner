@@ -6,6 +6,10 @@
     "UnusedCheck": {
       "commandName": "Project",
       "commandLineArgs": "unused -r \"E:\\GitHub\\LauncherX.Avalonia\\LauncherX.Avalonia\" -f \"Assets\\Language\\zh_cn.axaml\" -fu -v"
+    },
+    "RepairLangFile": {
+      "commandName": "Project",
+      "commandLineArgs": "repair -r \"E:\\GitHub\\LauncherX.Avalonia\\LauncherX.Avalonia\" -f \"Assets\\Language\\zh_cn.axaml\" -o \"./out.axaml\" -v"
     }
   }
 }
