@@ -30,7 +30,7 @@ jobs:
       working-directory: ./LangFileCleaner
 
     - name: Compress Build Files
-      run: zip -9 ${{ env.OS }}.zip publish
+      run: zip -9 -r ${{ env.OS }}.zip publish
       working-directory: ./LangFileCleaner/bin/Release/net9.0
       env:
         OS: ${{ matrix.os }}
@@ -41,7 +41,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.LANGFILECLEANERTOKEN }}
       with:
-        tag_name: ${{ github.head_ref }}.${{ github.sha }}
+        tag_name: ${{ github.ref }}.${{ github.sha }}
         release_name: Auto-Publish
         draft: true
         prerelease: false
