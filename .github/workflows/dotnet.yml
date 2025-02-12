@@ -41,8 +41,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.LANGFILECLEANERTOKEN }}
       with:
-        tag_name: ${{ github.ref_name }}.${{ github.sha }}
-        release_name: Auto-Publish
+        tag_name: Auto-Publish
+        release_name: ${{ github.ref_name }}.${{ github.sha }}
         draft: true
         prerelease: false
 
