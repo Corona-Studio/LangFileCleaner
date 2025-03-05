@@ -1,7 +1,6 @@
 ﻿using System.Collections.Frozen;
 using System.CommandLine;
 using System.CommandLine.Invocation;
-using System.Xml;
 using LangFileCleaner.Helpers;
 using Serilog.Core;
 
@@ -25,7 +24,11 @@ public static class UnusedKeyCommand
     private static readonly FrozenSet<string> SearchPatterns =
     [
         "{{DynamicResource {0}}}",
-        "LangHelper.{0}"
+        "ResourceKey=\"{0}\"",
+        "LangHelper.{0}",
+        "ErrorMessageResourceName = \"{0}\"",
+        "AddTitle(\"{0}\")",
+        "AddDescription(\"{0}\")"
     ];
 
     public static Command GetCommand()
