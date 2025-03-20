@@ -88,6 +88,27 @@ public static partial class SyncLangFileCommand
         {
             var line = srcFileContent[lineNum];
 
+            if (line.StartsWith("<ResourceDictionary", StringComparison.OrdinalIgnoreCase))
+            {
+                do
+                {
+                    resultFileContent.Add(srcFileContent[lineNum]);
+                    lineNum++;
+                } while (!srcFileContent[lineNum].EndsWith('>'));
+
+                resultFileContent.Add(srcFileContent[lineNum]);
+                lineNum++;
+
+                continue;
+            }
+
+            // End of the file
+            if (line.StartsWith("</ResourceDictionary", StringComparison.OrdinalIgnoreCase))
+            {
+                resultFileContent.Add(line);
+                break;
+            }
+
             if (string.IsNullOrWhiteSpace(line))
             {
                 resultFileContent.Add(line);
@@ -128,11 +149,7 @@ public static partial class SyncLangFileCommand
             var match = KeyRegex.Match(trimmedLine);
 
             // skip the line if it is not a key line
-            if (!match.Success)
-            {
-                resultFileContent.Add(line);
-                continue;
-            }
+            if (!match.Success) continue;
 
             var keyName = match.Groups[1].Value;
 
