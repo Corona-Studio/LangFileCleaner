@@ -137,6 +137,8 @@ public static partial class SyncLangFileCommand
                     isInCommentRange = true;
                     continue;
                 }
+
+                continue;
             }
 
             // we skip this line if it is in comment range
@@ -160,8 +162,12 @@ public static partial class SyncLangFileCommand
                 continue;
             }
 
+            var count = resultFileContent.Count;
+
             // If the target does not have the existing key, we are using this key and the value from the source
             AddContent(resultFileContent, srcFileContent, keyName);
+
+            lineNum += resultFileContent.Count - count;
 
             logger.Debug("Add missing key {KeyName} from source file", keyName);
         }
