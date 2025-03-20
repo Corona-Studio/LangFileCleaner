@@ -128,7 +128,11 @@ public static partial class SyncLangFileCommand
             var match = KeyRegex.Match(trimmedLine);
 
             // skip the line if it is not a key line
-            if (!match.Success) continue;
+            if (!match.Success)
+            {
+                resultFileContent.Add(line);
+                continue;
+            }
 
             var keyName = match.Groups[1].Value;
 
