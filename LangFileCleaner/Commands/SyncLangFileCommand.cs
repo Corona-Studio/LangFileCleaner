@@ -162,8 +162,14 @@ public static partial class SyncLangFileCommand
                 continue;
             }
 
+            var count = resultFileContent.Count;
+
             // If the target does not have the existing key, we are using this key and the value from the source
             AddContent(resultFileContent, srcFileContent, keyName);
+
+            var countDiff = resultFileContent.Count - count;
+
+            lineNum += countDiff - 1;
 
             logger.Debug("Add missing key {KeyName} from source file", keyName);
         }
